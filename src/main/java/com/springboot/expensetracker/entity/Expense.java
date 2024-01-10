@@ -1,6 +1,8 @@
 package com.springboot.expensetracker.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,13 +20,11 @@ public class Expense {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long expenseId;
 
-    @ManyToOne
-    @JoinColumn(name = "categoryId")
-    private Category category;
-
+    @NotEmpty
     private String expenseName;
 
-    private double expenseAmount;
+    @DecimalMin("0.0")
+    private Double expenseAmount;
 
     private LocalDate creationDate;
 
