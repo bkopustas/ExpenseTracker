@@ -33,11 +33,52 @@ public class ExpenseService {
     public Expense getExpenseById(long id) throws ExpenseNotFoundException {
         Optional<Expense> expense = expenseRepository.findById(id);
 
-        if(!expense.isPresent()){
+        if(expense.isEmpty()){
             throw new ExpenseNotFoundException("Expense does not exist");
         }
         return expense.get();
     }
+    public List<Expense> getExpensesByName(String expenseName) throws ExpenseNotFoundException{
+        List<Expense> expenses = expenseRepository.findByExpenseName(expenseName);
+
+        if(expenses.isEmpty()){
+            throw new ExpenseNotFoundException("There are no existing expenses by this name");
+        }
+        return new ArrayList<>(expenses);
+    }
+    public List<Expense> getExpenseBetweenDates(LocalDate fromDate, LocalDate toDate) throws ExpenseNotFoundException{
+        List<Expense> expenses = expenseRepository.findByCreationDateBetween(fromDate, toDate);
+
+        if(expenses.isEmpty()){
+            throw new ExpenseNotFoundException("No expenses found within the specified date range");
+        }
+        return new ArrayList<>(expenses);
+    }
+
+    public List<Expense> getExpenseBetweenAmounts(double minAmount, double maxAmount) throws ExpenseNotFoundException{
+        List<Expense> expenses = expenseRepository.findByExpenseAmountBetween(minAmount, maxAmount);
+
+        if(expenses.isEmpty()){
+            throw new ExpenseNotFoundException("No expenses found within the specified price range");
+        }
+        return new ArrayList<>(expenses);
+    }
+
+    public void deleteExpense(long id){
+        Expense expense = expenseRepository.findById(id).orElseThrow(() -> new ExpenseNotFoundException("Expense does not exist"));
+
+        expenseRepository.delete(expense);
+    }
+
+    public Expense updateExpense(Expense updatedExpense, long id){
+        Expense existingExpense = expenseRepository.findById(id).orElseThrow(() -> new ExpenseNotFoundException("Expense does not exist"));
+
+        existingExpense.setExpenseName(updatedExpense.getExpenseName());
+        existingExpense.setExpenseAmount(updatedExpense.getExpenseAmount());
+
+        return expenseRepository.save(existingExpense);
+    }
+
 
 
 
