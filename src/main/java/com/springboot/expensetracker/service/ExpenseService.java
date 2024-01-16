@@ -19,8 +19,9 @@ public class ExpenseService {
 
 
     public Expense createExpense(Expense expense){
-
-        expense.setCreationDate(LocalDate.now());
+        if(expense.getCreationDate() == null) {
+            expense.setCreationDate(LocalDate.now());
+        }
 
         return expenseRepository.save(expense);
     }
@@ -31,12 +32,8 @@ public class ExpenseService {
         return new ArrayList<>(expenses);
     }
     public Expense getExpenseById(long id) throws ExpenseNotFoundException {
-        Optional<Expense> expense = expenseRepository.findById(id);
 
-        if(expense.isEmpty()){
-            throw new ExpenseNotFoundException("Expense does not exist");
-        }
-        return expense.get();
+        return expenseRepository.findById(id).orElseThrow(() -> new ExpenseNotFoundException("Expense does not exist"));
     }
     public List<Expense> getExpensesByName(String expenseName) throws ExpenseNotFoundException{
         List<Expense> expenses = expenseRepository.findByExpenseName(expenseName);
@@ -76,7 +73,29 @@ public class ExpenseService {
         existingExpense.setExpenseName(updatedExpense.getExpenseName());
         existingExpense.setExpenseAmount(updatedExpense.getExpenseAmount());
 
+        LocalDate updatedCreationDate = updatedExpense.getCreationDate();
+        if(updatedCreationDate != null){
+            existingExpense.setCreationDate(updatedCreationDate);
+        }
+
         return expenseRepository.save(existingExpense);
+    }
+
+    public double getTotalExpenseAmount(Optional<LocalDate> fromDate, Optional<LocalDate> toDate){
+
+        List<Expense> expenses;
+
+        if(fromDate.isPresent() && toDate.isPresent()){
+            expenses = expenseRepository.findByCreationDateBetween(fromDate.get(), toDate.get());
+        }
+        else{
+            expenses = expenseRepository.findAll();
+        }
+
+        if(expenses.isEmpty()){
+            return 0.0;
+        }
+        return expenses.stream().mapToDouble(Expense::getExpenseAmount).sum();
     }
 
 
