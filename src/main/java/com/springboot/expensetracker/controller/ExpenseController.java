@@ -11,7 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @AllArgsConstructor
@@ -25,8 +28,16 @@ public class ExpenseController {
     }
 
     @GetMapping
-    public List<Expense> getAllExpenses(){
-        return expenseService.getAllExpenses();
+    public ResponseEntity<Map<String, Object>> getAllExpenses(){
+        List<Expense> expenses = expenseService.getAllExpenses();
+
+        String totalSum = String.format("%.2f", expenseService.getTotalExpenseAmount(Optional.empty(), Optional.empty()));
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("expenses", expenses);
+        response.put("totalAmount", totalSum);
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
@@ -40,9 +51,17 @@ public class ExpenseController {
     }
 
     @GetMapping("/dateRange")
-    public List<Expense> getExpensesBetweenDates(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+    public ResponseEntity<Map<String, Object>> getExpensesBetweenDates(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
                                                  @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
-        return expenseService.getExpenseBetweenDates(fromDate, toDate);
+        List<Expense> expenses = expenseService.getExpenseBetweenDates(fromDate, toDate);
+
+        String totalSum = String.format("%.2f", expenseService.getTotalExpenseAmount(Optional.of(fromDate), Optional.of(toDate)));
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("expenses", expenses);
+        response.put("totalAmount", totalSum);
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/price")
