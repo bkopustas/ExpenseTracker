@@ -8,6 +8,5 @@ Work in progress
 + Categories:
   - Entity connection with Expense
   - Logic for categories: CRUD, get expenses in category etc.
-+ when creating an expense, if no date provided then use today's date, if provided use that
 + refactor code (creationDate -> expenseDate, etc.)
 
